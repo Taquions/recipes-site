@@ -16,5 +16,6 @@ def recipe(request, recipe_id):
     '''View for the recipe page.'''
     return render(request, 'recipes/pages/recipe-view.html', context={
         'recipe': make_recipe(),
+        'is_detail_page': True,
     })
 # Create your views here.
