@@ -6,7 +6,7 @@ from recipes.models import Recipe
 def home(request):
     '''Fuction to View for the home page.
     Remember to add the app to the list of installed apps
-    in projeto/settings.py.'''
+    in project/settings.py.'''
     recipes = Recipe.objects.filter(
         is_published=True
     ).order_by('-id')
@@ -18,7 +18,7 @@ def home(request):
 def category(request, category_id):
     '''Fuction to View for the home page.
     Remember to add the app to the list of installed apps
-    in projeto/settings.py.'''
+    in project/settings.py.'''
     recipes = get_list_or_404(
         Recipe.objects.filter(
             category__id=category_id,
