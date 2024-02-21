@@ -1,4 +1,5 @@
 '''Module for the views of the recipes app.'''
+import os
 from django.db.models import Q
 from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django.http.response import Http404
@@ -6,7 +7,8 @@ from django.http.response import Http404
 from recipes.models import Recipe
 from utils.pagination import make_pagination
 
-PER_PAGE = 3
+
+PER_PAGE = os.environ.get('PER_PAGE', 6)  # take from .env
 
 
 def home(request):
