@@ -1,6 +1,12 @@
 '''Module for the views of the recipes app.'''
+from django.db.models import Q
 from django.shortcuts import render, get_list_or_404, get_object_or_404
+from django.http.response import Http404
+
 from recipes.models import Recipe
+from utils.pagination import make_pagination
+
+PER_PAGE = 3
 
 
 def home(request):
@@ -10,8 +16,12 @@ def home(request):
     recipes = Recipe.objects.filter(
         is_published=True
     ).order_by('-id')
+
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
     return render(request, 'recipes/pages/home.html', context={
-        'recipes': recipes,
+        'recipes': page_obj,
+        'pagination_range': pagination_range,
     })
 
 
@@ -27,8 +37,11 @@ def category(request, category_id):
         ).order_by('-id'),
     )
 
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
     return render(request, 'recipes/pages/category.html', context={
-        'recipes': recipes,
+        'recipes': page_obj,
+        'pagination_range': pagination_range,
         'title': f"{recipes[0].category.name} | "
     })
 
@@ -44,4 +57,34 @@ def recipe(request, recipe_id):
         'recipe': recipe_,
         'is_detail_page': True,
     })
-# Create your views here.
+
+
+def search(request):
+    '''View for the search page.'''
+    search_term = request.GET.get('q', '').strip()
+    # request.GET.get('q') is used to get the value of the query parameter q
+    # the second get is for return none if the parameter is not found
+    # strip is used to remove the white spaces from the string
+
+    if not search_term:
+        raise Http404()
+
+    recipes = Recipe.objects.filter(
+        Q(
+            Q(title__icontains=search_term) |
+            Q(description__icontains=search_term),
+        ),
+        # __icontains is used to make the search using 'LIKE' in SQL
+        # and the i means that doesn't matter if the string is upper or lower
+        is_published=True
+    ).order_by('-id')
+
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
+    return render(request, 'recipes/pages/search.html', {
+        'page_title': f'Search for "{search_term}" |',
+        'search_term': search_term,
+        'recipes': page_obj,
+        'pagination_range': pagination_range,
+        'additional_url_query': f'q={search_term}&',
+    })
